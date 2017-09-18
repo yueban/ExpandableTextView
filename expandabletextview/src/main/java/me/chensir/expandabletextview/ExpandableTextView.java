@@ -103,6 +103,8 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
 
     private boolean mExpandCollapseVisibleOnExpand;
 
+    private int mContentExpandCollapseSpace;
+
     /* Listener for callback */
     private OnExpandStateChangeListener mListener;
 
@@ -354,7 +356,10 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
         mCollapsedString = typedArray.getString(R.styleable.ExpandableTextView_collapseText);
         mStateTextColor = typedArray.getColorStateList(R.styleable.ExpandableTextView_expandCollapseTextColor);
         mStateTextBackground = typedArray.getDrawable(R.styleable.ExpandableTextView_expandCollapseTextBackground);
-        mExpandCollapseVisibleOnExpand = typedArray.getBoolean(R.styleable.ExpandableTextView_expandCollapseVisibleOnExpand, true);
+        mExpandCollapseVisibleOnExpand =
+            typedArray.getBoolean(R.styleable.ExpandableTextView_expandCollapseVisibleOnExpand, true);
+        mContentExpandCollapseSpace =
+            typedArray.getDimensionPixelOffset(R.styleable.ExpandableTextView_contentExpandCollapseSpace, 0);
 
         if (mExpandString == null) {
             mExpandString = this.getContext().getString(R.string.expand_string);
@@ -383,6 +388,7 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
         } else if (mStateTvGravity == STATE_TV_GRAVITY_RIGHT) {
             params.gravity = Gravity.END;
         }
+        params.topMargin = mContentExpandCollapseSpace;
         mStateTv.setLayoutParams(params);
         mStateTv.setText(mCollapsed ? mExpandString : mCollapsedString);
         mStateTv.setTextColor(mStateTextColor != null ? mStateTextColor : ColorStateList.valueOf(Color.BLACK));

@@ -15,6 +15,7 @@
         expandableTextView:expandCollapseVisibleOnExpand="false"
         expandableTextView:contentTextSize="15sp"
         expandableTextView:expandCollapseTextColor="#399df7"
+        expandableTextView:contentExpandCollapseSpace="10dp"
         expandableTextView:expandCollapseTextSize="15sp"
         expandableTextView:expandCollapseTextBackground="@drawable/sel_bg_state_text"
         expandableTextView:expandDrawable="@null"

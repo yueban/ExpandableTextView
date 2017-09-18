@@ -14,6 +14,7 @@
         <attr name="expandCollapseTextColor" format="color"/>
         <attr name="expandCollapseTextBackground" format="reference"/>
         <attr name="expandCollapseVisibleOnExpand" format="boolean"/>
+        <attr name="contentExpandCollapseSpace" format="dimension"/>
         <attr name="DrawableAndTextGravity">
             <enum name="left" value="0"/>
             <enum name="center" value="1"/>

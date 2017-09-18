@@ -19,6 +19,7 @@ package me.chensir.expandabletextview;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -30,6 +31,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.SparseBooleanArray;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -87,13 +89,19 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
 
     private float mContentTextSize;
 
-    private int mContentTextColor;
+    private float mExpandCollapseTextSize;
+
+    private ColorStateList mContentTextColor;
     
     private float mContentLineSpacingMultiplier;
 
-    private int mStateTextColor;
+    private ColorStateList mStateTextColor;
+
+    private Drawable mStateTextBackground;
 
     private boolean mAnimating;
+
+    private boolean mExpandCollapseVisibleOnExpand;
 
     /* Listener for callback */
     private OnExpandStateChangeListener mListener;
@@ -171,6 +179,13 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
                 clearAnimation();
                 // clear the animation flag
                 mAnimating = false;
+                if (mCollapsed) {
+                    mTv.setMaxLines(mMaxCollapsedLines);
+                } else if (!mExpandCollapseVisibleOnExpand) {
+                    mStateTv.setVisibility(GONE);
+                    getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                    requestLayout();
+                }
 
                 // notify the listener
                 if (mListener != null) {
@@ -197,7 +212,11 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
 
     @Override
     protected void onFinishInflate() {
+        super.onFinishInflate();
         findViews();
+        if (isInEditMode()) {
+            setText("这是一段好长好长的文字");
+        }
     }
 
     @Override
@@ -230,7 +249,7 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
         if (mCollapsed) {
             mTv.setMaxLines(mMaxCollapsedLines);
         }
-        mStateTv.setVisibility(View.VISIBLE);
+        mStateTv.setVisibility(mCollapsed || mExpandCollapseVisibleOnExpand ? View.VISIBLE : GONE);
 
         // Re-measure with new setup
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -286,23 +305,19 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
         TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.ExpandableTextView);
         mMaxCollapsedLines = typedArray.getInt(R.styleable.ExpandableTextView_maxCollapsedLines, MAX_COLLAPSED_LINES);
         mAnimationDuration = typedArray.getInt(R.styleable.ExpandableTextView_animDuration, DEFAULT_ANIM_DURATION);
+        mExpandCollapseTextSize = typedArray.getDimension(R.styleable.ExpandableTextView_expandCollapseTextSize, DEFAULT_CONTENT_TEXT_SIZE);
         mContentTextSize = typedArray.getDimension(R.styleable.ExpandableTextView_contentTextSize, DEFAULT_CONTENT_TEXT_SIZE);
         mContentLineSpacingMultiplier = typedArray.getFloat(R.styleable.ExpandableTextView_contentLineSpacingMultiplier, DEFAULT_CONTENT_TEXT_LINE_SPACING_MULTIPLIER);
-        mContentTextColor = typedArray.getColor(R.styleable.ExpandableTextView_contentTextColor, Color.BLACK);
+        mContentTextColor = typedArray.getColorStateList(R.styleable.ExpandableTextView_contentTextColor);
 
         mExpandDrawable = typedArray.getDrawable(R.styleable.ExpandableTextView_expandDrawable);
         mCollapseDrawable = typedArray.getDrawable(R.styleable.ExpandableTextView_collapseDrawable);
         mStateTvGravity = typedArray.getInt(R.styleable.ExpandableTextView_DrawableAndTextGravity, STATE_TV_GRAVITY_RIGHT);
         mExpandString = typedArray.getString(R.styleable.ExpandableTextView_expandText);
         mCollapsedString = typedArray.getString(R.styleable.ExpandableTextView_collapseText);
-        mStateTextColor = typedArray.getColor(R.styleable.ExpandableTextView_expandCollapseTextColor, Color.BLACK);
-
-        if (mExpandDrawable == null) {
-            mExpandDrawable = getDrawable(getContext(), R.drawable.ic_expand_more_black_12dp);
-        }
-        if (mCollapseDrawable == null) {
-            mCollapseDrawable = getDrawable(getContext(), R.drawable.ic_expand_less_black_12dp);
-        }
+        mStateTextColor = typedArray.getColorStateList(R.styleable.ExpandableTextView_expandCollapseTextColor);
+        mStateTextBackground = typedArray.getDrawable(R.styleable.ExpandableTextView_expandCollapseTextBackground);
+        mExpandCollapseVisibleOnExpand = typedArray.getBoolean(R.styleable.ExpandableTextView_expandCollapseVisibleOnExpand, true);
 
         if (mExpandString == null) {
             mExpandString = this.getContext().getString(R.string.expand_string);
@@ -317,13 +332,13 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
 
     private void findViews() {
         mTv = (TextView) findViewById(R.id.expandable_text);
-        mTv.setTextColor(mContentTextColor);
-        mTv.setTextSize(mContentTextSize);
+        mTv.setTextColor(mContentTextColor != null ? mContentTextColor : ColorStateList.valueOf(Color.BLACK));
+        mTv.setTextSize(TypedValue.COMPLEX_UNIT_PX, mContentTextSize);
+        mTv.setEllipsize(TextUtils.TruncateAt.END);
         mTv.setLineSpacing(0, mContentLineSpacingMultiplier);
-        mTv.setOnClickListener(this);
 
         mStateTv = (TextView) findViewById(R.id.expand_collapse);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         if (mStateTvGravity == STATE_TV_GRAVITY_LEFT) {
             params.gravity = Gravity.START;
         } else if (mStateTvGravity == STATE_TV_GRAVITY_CENTER) {
@@ -333,7 +348,13 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
         }
         mStateTv.setLayoutParams(params);
         mStateTv.setText(mCollapsed ? mExpandString : mCollapsedString);
-        mStateTv.setTextColor(mStateTextColor);
+        mStateTv.setTextColor(mStateTextColor != null ? mStateTextColor : ColorStateList.valueOf(Color.BLACK));
+        mStateTv.setTextSize(TypedValue.COMPLEX_UNIT_PX, mExpandCollapseTextSize);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            mStateTv.setBackground(mStateTextBackground);
+        } else {
+            mStateTv.setBackgroundDrawable(mStateTextBackground);
+        }
         mStateTv.setCompoundDrawablesWithIntrinsicBounds(mCollapsed ? mExpandDrawable : mCollapseDrawable, null, null, null);
         mStateTv.setCompoundDrawablePadding(10);
         mStateTv.setOnClickListener(this);

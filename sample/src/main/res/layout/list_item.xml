@@ -9,8 +9,15 @@
         android:id="@+id/expand_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        expandableTextView:maxCollapsedLines="4">
-
-    </me.chensir.expandabletextview.ExpandableTextView>
+        expandableTextView:DrawableAndTextGravity="left"
+        expandableTextView:animDuration="0"
+        expandableTextView:collapseDrawable="@null"
+        expandableTextView:expandCollapseVisibleOnExpand="false"
+        expandableTextView:contentTextSize="15sp"
+        expandableTextView:expandCollapseTextColor="#399df7"
+        expandableTextView:expandCollapseTextSize="15sp"
+        expandableTextView:expandCollapseTextBackground="@drawable/sel_bg_state_text"
+        expandableTextView:expandDrawable="@null"
+        expandableTextView:maxCollapsedLines="3" />
 
 </LinearLayout>

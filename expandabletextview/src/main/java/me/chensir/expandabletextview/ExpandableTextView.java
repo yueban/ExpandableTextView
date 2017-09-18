@@ -272,6 +272,43 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
         setVisibility(TextUtils.isEmpty(text) ? View.GONE : View.VISIBLE);
     }
 
+    public void setContentTextColor(ColorStateList contentTextColor) {
+        mContentTextColor = contentTextColor;
+        mTv.setTextColor(contentTextColor);
+    }
+
+    public void setContentTextColor(int contentTextColor) {
+        setContentTextColor(ColorStateList.valueOf(contentTextColor));
+    }
+
+    public void setStateTextColor(ColorStateList stateTextColor) {
+        mStateTextColor = stateTextColor;
+        mStateTv.setTextColor(mStateTextColor);
+    }
+
+    public void setStateTextColor(int stateTextColor) {
+        setStateTextColor(ColorStateList.valueOf(stateTextColor));
+    }
+
+    public void setContentTextSize(float contentTextSize) {
+        mContentTextSize = contentTextSize;
+        mTv.setTextSize(TypedValue.COMPLEX_UNIT_PX,mContentTextSize);
+    }
+
+    public void setExpandCollapseTextSize(float expandCollapseTextSize) {
+        mExpandCollapseTextSize = expandCollapseTextSize;
+        mStateTv.setTextSize(TypedValue.COMPLEX_UNIT_PX,mExpandCollapseTextSize);
+    }
+
+    public void setStateTextBackground(Drawable stateTextBackground) {
+        mStateTextBackground = stateTextBackground;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            mStateTv.setBackground(stateTextBackground);
+        } else {
+            mStateTv.setBackgroundDrawable(stateTextBackground);
+        }
+    }
+
     public void setText(@Nullable CharSequence text, @NonNull SparseBooleanArray collapsedStatus, int position) {
         mCollapsedStatus = collapsedStatus;
         mPosition = position;

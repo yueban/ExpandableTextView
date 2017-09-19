@@ -264,6 +264,14 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
         }
     }
 
+    public TextView getContentTextView() {
+        return mTv;
+    }
+
+    public TextView getExpandTextView() {
+        return mStateTv;
+    }
+
     public void setOnExpandStateChangeListener(@Nullable OnExpandStateChangeListener listener) {
         mListener = listener;
     }

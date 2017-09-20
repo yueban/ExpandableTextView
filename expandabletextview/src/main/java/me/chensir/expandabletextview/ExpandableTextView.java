@@ -92,7 +92,7 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
     private float mExpandCollapseTextSize;
 
     private ColorStateList mContentTextColor;
-    
+
     private float mContentLineSpacingMultiplier;
 
     private ColorStateList mStateTextColor;
@@ -319,17 +319,21 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
         }
     }
 
-    public void setText(@Nullable CharSequence text, @NonNull SparseBooleanArray collapsedStatus, int position) {
-        mCollapsedStatus = collapsedStatus;
-        mPosition = position;
-        boolean isCollapsed = collapsedStatus.get(position, true);
+    public void setText(@Nullable CharSequence text, boolean isExpand) {
         clearAnimation();
-        mCollapsed = isCollapsed;
+        mCollapsed = !isExpand;
         mStateTv.setText(mCollapsed ? mExpandString : mCollapsedString);
         mStateTv.setCompoundDrawablesWithIntrinsicBounds(mCollapsed ? mExpandDrawable : mCollapseDrawable, null, null, null);
         setText(text);
         getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
         requestLayout();
+    }
+
+    public void setText(@Nullable CharSequence text, @NonNull SparseBooleanArray collapsedStatus, int position) {
+        mCollapsedStatus = collapsedStatus;
+        mPosition = position;
+        boolean isCollapsed = collapsedStatus.get(position, true);
+        setText(text, !isCollapsed);
     }
 
     @Nullable
